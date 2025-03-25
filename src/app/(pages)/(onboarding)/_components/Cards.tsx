@@ -6,18 +6,26 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { useRouter } from "next/navigation";
 
 interface CardProps {
-  name: string;
+  cardName: string;
   creationTime: number;
   institution_timing: string;
+  institution_id : string;
 }
 
-const Cards = ({ name, creationTime, institution_timing }: CardProps) => {
+
+
+const Cards = ({ cardName, creationTime, institution_timing,institution_id }: CardProps) => {
+  const router = useRouter()
+  const handle_click = (institution_id : string) : void=>{
+    router.push(`/dashboard/${institution_id}`)
+  }
   return (
-    <Card className="w-full h-auto cursor-pointer">
+    <Card className="w-full h-auto cursor-pointer" onClick={() => handle_click(institution_id)}>
       <CardHeader>
-        <CardTitle className="text-md font-bold">{name}</CardTitle>
+        <CardTitle className="text-md font-bold h-12">{cardName}</CardTitle>
       </CardHeader>
       <CardContent>
         <p className="text-sm">Timing: {institution_timing}</p>

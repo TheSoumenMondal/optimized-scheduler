@@ -1,9 +1,6 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 
-
-// create an institute
-
 export const createInstitution = mutation({
     args: {
         name: v.string(),
@@ -13,69 +10,76 @@ export const createInstitution = mutation({
         institution_timing: v.string(),
     },
     handler: async (ctx, args) => {
-        try {
-            // Capitalize the institution name
-            const capitalizedName = args.name.toUpperCase();
-
-
-            const existingInstitution = await ctx.db.query("institutions")
-                .filter(q =>
-                    q.and(
-                        q.eq(q.field("admin_email"), args.admin_email),
-                        q.eq(q.field("name"), capitalizedName)
-                    )
+        const institutionName = args.name;
+        const existingInstitution = await ctx.db
+            .query("institutions")
+            .filter((q) =>
+                q.and(
+                    q.eq(q.field("admin_email"), args.admin_email),
+                    q.eq(q.field("name"), institutionName)
                 )
-                .first();
+            )
+            .first();
 
-            if (existingInstitution) {
-                return
-            }
-
-            const newInstitute = await ctx.db.insert("institutions", {
-                name: capitalizedName,
-                admin_email: args.admin_email,
-                courses_offered: args.courses_offered,
-                total_rooms_available: args.total_rooms_available,
-                institution_timing: args.institution_timing,
-            })
-
-            const admin = await ctx.db.query("admin")
-                .filter(q => q.eq(q.field("email"), args.admin_email))
-                .first();
-
-            if (!admin) {
-                throw new Error("Admin not found");
-            }
-
-            // Update admin's institutions array
-            await ctx.db.patch(admin._id, {
-                institutions: [...(admin.institutions || []), newInstitute]
-            });
-            return newInstitute;
-
-        } catch (error) {
-            if (error instanceof Error) {
-                return error.message;
-            }
-            return "ERROR";
+        if (existingInstitution) {
+            throw new Error("An institution with this name and admin email already exists.");
         }
-    }
-})
 
-//get all institutes for the same admin
+        const admin = await ctx.db
+            .query("admin")
+            .filter((q) => q.eq(q.field("email"), args.admin_email))
+            .first();
+
+        if (!admin) {
+            throw new Error("Admin not found.");
+        }
+
+        const newInstituteId = await ctx.db.insert("institutions", {
+            name: institutionName,
+            admin_email: args.admin_email,
+            courses_offered: args.courses_offered,
+            total_rooms_available: args.total_rooms_available,
+            institution_timing: args.institution_timing,
+            faculties: [],
+        });
+
+        await ctx.db.patch(admin._id, {
+            institutions: [...(admin.institutions || []), newInstituteId],
+        });
+
+        return newInstituteId;
+    },
+});
 
 export const getAllInstitutes = query({
     args: {
-        admin_email: v.string()
+        admin_email: v.string(),
     },
     handler: async (ctx, args) => {
-        try {
-            const allInstitutes = await ctx.db.query("institutions")
-                .filter(q => q.eq(q.field("admin_email"), args.admin_email))
-                .collect();
-            return allInstitutes;
-        } catch (error) {
-            return "ERROR";
+        const allInstitutes = await ctx.db
+            .query("institutions")
+            .filter((q) => q.eq(q.field("admin_email"), args.admin_email))
+            .collect();
+
+        return allInstitutes;
+    },
+});
+
+
+export const getSingleInstitutionDetails = query({
+    args: {
+        institution_id: v.id("institutions"),
+    },
+    handler: async (ctx, args) => {
+        const institution = await ctx.db
+            .query("institutions")
+            .filter((q) => q.eq(q.field("_id"), args.institution_id))
+            .first();
+
+        if (!institution) {
+            throw new Error("Institution not found.");
         }
-    }
-})
+
+        return institution;
+    },
+});

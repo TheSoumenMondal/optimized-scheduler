@@ -12,6 +12,7 @@ export default defineSchema({
         name: v.string(),
         admin_email: v.string(),
         courses_offered: v.optional(v.array(v.id("courses"))),
+        faculties: v.optional(v.array(v.id("faculties"))),   // Stores approved faculty IDs
         total_rooms_available: v.number(),
         institution_timing: v.string(),
     }),
@@ -40,12 +41,17 @@ export default defineSchema({
     }),
     faculties: defineTable({
         name: v.string(),
+        email: v.string(),                              // Added as a unique identifier to prevent multiple requests
         teaching_subjects: v.optional(v.array(v.id("subjects"))),
         department: v.string(),
-        isAvilable: v.boolean(),
-        isVerified: v.boolean()
-    })
-    ,
+        isAvailable: v.boolean(),
+        isVerified: v.boolean(),
+        institutionId: v.optional(v.id("institutions")), // Links to institution after approval
+        status: v.union(v.literal("pending"),
+            v.literal("approved"),
+            v.literal("rejected")
+        )                             // Tracks approval status (e.g., "pending", "approved", "rejected")
+    }),
     sections: defineTable({
         name: v.string(),
         hasGroups: v.boolean(),
@@ -58,6 +64,13 @@ export default defineSchema({
     labs: defineTable({
         name: v.string(),
         room_number: v.string(),
-        avilable_for_subject: v.optional(v.array(v.id("subjects")))
-    })
-})
+        available_for_subject: v.optional(v.array(v.id("subjects")))
+    }),
+    invitation: defineTable({
+        token: v.string(),                    // For the 
+        institutionId: v.id("institutions"),  // Links to
+        createdAt: v.number(),
+        expiry: v.number(),
+        status: v.union(v.literal("active"), v.literal("expired")),                   // Tracks link status (e.g., "active", "expired")
+    }),
+});

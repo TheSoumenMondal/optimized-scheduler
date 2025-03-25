@@ -11,12 +11,12 @@ const page = () => {
   const user = useUser();
 
   return (
-    <div className="min-h-screen bg-stone-950 text-white flex flex-col items-center">
+    <div className="min-h-screen bg-gray-200 dark:bg-stone-950 dark:text-white flex flex-col items-center">
       {/* Navigation Bar */}
       <nav className="w-full flex justify-between items-center p-5 md:p-10 select-none">
         {/* Logo */}
-        <Link href={"/"} className="logo">
-          Edemy
+        <Link href={"/"} className="logo font-bold">
+          Scheduler
         </Link>
 
         {/* Log in Link */}

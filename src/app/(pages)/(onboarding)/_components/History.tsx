@@ -4,6 +4,7 @@ import React from "react";
 import { api } from "../../../../../convex/_generated/api";
 import { Loader2 } from "lucide-react";
 import Cards from "./Cards";
+import { BlurFade } from "@/components/magicui/blur-fade";
 
 const History = () => {
   const user = useUser();
@@ -17,7 +18,7 @@ const History = () => {
     admin_email: email,
   });
 
-  if (!getAllInstitutes || getAllInstitutes === "ERROR") {
+  if (!getAllInstitutes) {
     return (
       <div className="w-full h-full flex items-center justify-center">
         <Loader2 className="animate-spin" />
@@ -29,12 +30,15 @@ const History = () => {
     <div className="w-full h-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-x-3 gap-y-2">
       {getAllInstitutes.length > 0 &&
         getAllInstitutes.map((institute, index) => (
-          <Cards
-            key={index}
-            name={institute.name}
-            creationTime={institute._creationTime}
-            institution_timing={institute.institution_timing}
-          />
+          <BlurFade key={index} delay={0.25 + index * 0.05} inView>
+            <Cards
+              institution_id={institute._id}
+              key={index}
+              cardName={institute.name}
+              creationTime={institute._creationTime}
+              institution_timing={institute.institution_timing}
+            />
+          </BlurFade>
         ))}
     </div>
   );
