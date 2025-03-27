@@ -15,6 +15,7 @@ import type {
 } from "convex/server";
 import type * as admin from "../admin.js";
 import type * as courses from "../courses.js";
+import type * as department from "../department.js";
 import type * as faculty from "../faculty.js";
 import type * as institution from "../institution.js";
 import type * as invitation from "../invitation.js";
@@ -30,6 +31,7 @@ import type * as invitation from "../invitation.js";
 declare const fullApi: ApiFromModules<{
   admin: typeof admin;
   courses: typeof courses;
+  department: typeof department;
   faculty: typeof faculty;
   institution: typeof institution;
   invitation: typeof invitation;

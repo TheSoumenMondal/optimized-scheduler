@@ -8,11 +8,23 @@ export const addCourse = mutation({
         departments: v.optional(v.array(v.id('departments'))),
     },
     handler: async (ctx, args) => {
+        const isExistingCourse = await ctx
+            .db
+            .query("courses")
+            .filter((q) => q.eq(q.field("name"), args.name)).first()
+        if (isExistingCourse) return;
+        
+        const smallName = args.name.toLowerCase()
         const course = await ctx.db.insert("courses", {
-            name: args.name,
+            name: smallName,
             duration: args.duration,
             departments: args.departments
         })
+
+        await ctx.db.patch(course, {
+            departments: [...(args.departments ?? [])]
+        })
+
         return course
     }
 })
