@@ -20,13 +20,16 @@ export default defineSchema({
 
   courses: defineTable({
     name: v.string(),
+    db_name : v.optional(v.string()),
     duration : v.number(),
+    institution_id : v.optional(v.id('institutions')),
     departments: v.optional(v.array(v.id('departments'))),
   }),
 
   departments: defineTable({
     name: v.string(),
     years: v.number(),
+    course_id : v.optional(v.id('courses')),
     minimum_classes_per_day: v.number(),
     max_classes_per_day: v.number(),
   }),
