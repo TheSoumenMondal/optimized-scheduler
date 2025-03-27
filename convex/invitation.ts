@@ -43,7 +43,7 @@ export const getInvitationForInstitute = query({
             .filter((q) => q.eq(q.field("institutionId"), args.institution_id))
             .collect();
         if (!invitation) {
-            return null; // Or throw an error if preferred: throw new Error("No active invitation found");
+            return null;
         }
         return invitation;
     },

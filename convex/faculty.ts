@@ -29,12 +29,12 @@ export const createFaculty = mutation({
         const facultyId = await ctx.db.insert("faculties", {
             name: args.name,
             email: args.email,
-            department: args.department,
-            teaching_subjects: [],        // Default to empty array
-            isAvailable: false,           // Default, can be updated by admin
-            isVerified: false,            // Default, can be updated by admin
-            institutionId: invitation.institutionId, // Link to institution from invitation
-            status: "pending",            // Awaiting admin approval
+            department: args.department as any,
+            teaching_subjects: [],
+            isAvailable: false,
+            isVerified: false,
+            institutionId: invitation.institutionId,
+            status: "pending",
         });
         return facultyId;
     },
@@ -49,8 +49,64 @@ export const getAllFaculty = query({
             .query("faculties")
             .filter((q) => q.eq(q.field("institutionId"), args.institutionId))
             .collect();
-        return allFaculty; // Returns empty array if none found
+        return allFaculty;
 
     }
 
+})
+
+export const approveFaculty = mutation({
+    args: {
+        institutionId: v.id("institutions"),
+        faculty_id: v.id("faculties"),
+        status: v.union(v.literal("pending"),
+            v.literal("approved"),
+            v.literal("rejected")
+        )
+    },
+    handler: async (ctx, args) => {
+        await ctx.db.patch(args.faculty_id, {
+            status: args.status,
+        });
+        await ctx.db.patch(args.faculty_id, {
+            institutionId: args.institutionId,
+        })
+        if (args.status === "approved") {
+            await ctx.db.patch(args.faculty_id, {
+                isVerified: true,
+            });
+        }
+        const institution = await ctx.db.get(args.institutionId);
+
+        const existingFaculties = institution!.faculties || [];
+        await ctx.db.patch(args.institutionId, {
+            faculties: [...existingFaculties, args.faculty_id]
+        });
+        return args.status
+    }
+
+})
+
+
+export const removeFaculty = mutation({
+    args: {
+        faculty_id: v.id("faculties"),
+    },
+    handler: async (ctx, args) => {
+        await ctx.db.delete(args.faculty_id);
+        const faculty = await ctx.db.get(args.faculty_id);
+        if (!faculty?.institutionId) {
+            throw new Error("Faculty or institution ID not found");
+        }
+        const institution = await ctx.db.get(faculty.institutionId);
+        if (!institution?.faculties) {
+            return
+        }
+        const updatedFaculties = institution.faculties.filter(
+            (id) => id !== args.faculty_id
+        );
+        await ctx.db.patch(faculty.institutionId, {
+            faculties: updatedFaculties,
+        });
+    }
 })

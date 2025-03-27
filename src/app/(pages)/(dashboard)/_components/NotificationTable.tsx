@@ -3,15 +3,16 @@ import {
   TableBody,
   TableCaption,
   TableCell,
-  TableFooter,
   TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useQuery } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import React from "react";
 import { api } from "../../../../../convex/_generated/api";
 import { useParams } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 
 export function NotificationTable() {
   const { id } = useParams();
@@ -19,18 +20,27 @@ export function NotificationTable() {
   const getInvitationForInstitute = useQuery(api.faculty.getAllFaculty, {
     institutionId: id as any,
   });
-  // Ensure invitations is always an array
+
+  const updateFacultyStatus = useMutation(api.faculty.approveFaculty);
+
   const invitations = getInvitationForInstitute || [];
+
+  const handleUpdateStatus = async (facultyId: string) => {
+    await updateFacultyStatus({
+      institutionId: id as any,
+      faculty_id: facultyId as any,
+      status: "approved"
+    });
+  };
 
   return (
     <Table className="select-none">
       <TableCaption>A list of all invitations.</TableCaption>
       <TableHeader>
         <TableRow>
-          <TableHead className="w-[100px]">Name</TableHead>
-          <TableHead>Email</TableHead>
-          <TableHead>Status</TableHead>
-          <TableHead className="text-right">Department</TableHead>
+          <TableHead>Name</TableHead>
+          <TableHead>Department</TableHead>
+          <TableHead></TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -39,9 +49,16 @@ export function NotificationTable() {
           invitations.map((inv: any) => (
             <TableRow key={inv._id}>
               <TableCell>{inv.name}</TableCell>
-              <TableCell className="font-sm">{inv.email}</TableCell>
-              <TableCell>{inv.status}</TableCell>
-              <TableCell className="text-right">{inv.department}</TableCell>
+              <TableCell>{inv.department}</TableCell>
+              <TableCell>
+                <Button 
+                  onClick={() => handleUpdateStatus(inv._id)} 
+                  variant="outline" 
+                  className="hover:cursor-pointer"
+                >
+                  Accept?
+                </Button>
+              </TableCell>
             </TableRow>
           ))}
       </TableBody>

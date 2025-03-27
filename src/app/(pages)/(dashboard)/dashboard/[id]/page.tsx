@@ -20,6 +20,7 @@ import toast, { Toaster } from "react-hot-toast";
 import { Loader2, Loader2Icon } from "lucide-react";
 import { NotificationTable } from "../../_components/NotificationTable";
 import Link from "next/link";
+import { Hero } from "../../_components/Hero";
 
 export default function DashboardPage() {
   const { id } = useParams();
@@ -111,18 +112,16 @@ export default function DashboardPage() {
                 </svg>
               </div>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="pt-6">
               <DialogHeader>
                 <DialogTitle className="text-xl select-none">
                   Faculty Invitation History
                 </DialogTitle>
-                <Separator />
                 <NotificationTable />
               </DialogHeader>
             </DialogContent>
           </Dialog>
 
-          <Button className="cursor-pointer">Add Faculty</Button>
           <Dialog>
             <DialogTrigger asChild>
               <Button>Create Invitation Link</Button>
@@ -174,6 +173,11 @@ export default function DashboardPage() {
         </div>
       </div>
       <Separator />
+
+      <div className="w-full h-[74vh]">
+        <Hero />
+      </div>
+
       <Toaster />
     </div>
   ) : (
