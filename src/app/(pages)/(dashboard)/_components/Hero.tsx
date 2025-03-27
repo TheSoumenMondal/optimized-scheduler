@@ -21,6 +21,8 @@ import { api } from "../../../../../convex/_generated/api";
 export function Hero() {
   const [courseName, setCourseName] = useState<string>("");
   const [courseDuration, setCourseDuration] = useState<number>(0);
+  const [minimumClass, setMinimumClass] = useState<number>(0);
+  const [maximumClass, setMaximumClass] = useState<number>(0);
 
   const addCourse = useMutation(api.courses.addCourse);
 
@@ -92,6 +94,16 @@ export function Hero() {
                     placeholder="Enter duration of course"
                     value={courseDuration}
                     onChange={(e) => setCourseDuration(Number(e.target.value))}
+                  />
+                  <Input
+                    placeholder="Enter minimum classes per day"
+                    value={minimumClass}
+                    onChange={(e) => setMinimumClass(Number(e.target.value))}
+                  />
+                  <Input
+                    placeholder="Enter maximum classes per day"
+                    value={maximumClass}
+                    onChange={(e) => setMaximumClass(Number(e.target.value))}
                   />
                   <Button className="w-full" onClick={handleClick}>
                     Add course

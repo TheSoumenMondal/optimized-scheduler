@@ -12,7 +12,7 @@ import React from "react";
 import { api } from "../../../../../convex/_generated/api";
 import { useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+
 
 export function NotificationTable() {
   const { id } = useParams();
@@ -40,7 +40,6 @@ export function NotificationTable() {
         <TableRow>
           <TableHead>Name</TableHead>
           <TableHead>Department</TableHead>
-          <TableHead></TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
