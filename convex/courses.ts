@@ -18,7 +18,7 @@ export const addCourse = mutation({
                 .filter((q) => q.eq(q.field("db_name"), db_name)).first();
 
             if (isExistingCourse) {
-                throw new Error(`Course with name ${args.name} already exists`);
+                return 404;
             }
 
             const course = await ctx.db.insert("courses", {

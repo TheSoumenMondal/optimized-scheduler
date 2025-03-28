@@ -17,33 +17,19 @@ import { Input } from "@/components/ui/input";
 import { useEffect, useState } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "../../../../../convex/_generated/api";
-import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
 import toast, { Toaster } from "react-hot-toast";
 import { useParams } from "next/navigation";
-import CourseCard from "./CourseCard";
+import { CourseCard } from "./CourseCard";
 import { BlurFade } from "@/components/magicui/blur-fade";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+
 export function Hero() {
   const { id } = useParams();
   const [courseName, setCourseName] = useState<string>("");
   const [courseDuration, setCourseDuration] = useState<number>(0);
-  const [minimumClass, setMinimumClass] = useState<number>(0);
-  const [maximumClass, setMaximumClass] = useState<number>(0);
-  const [selectedCourse, setSelectedCourse] = useState<string>("");
   const [courses, setCourses] = useState<any[]>([]);
   const addCourse = useMutation(api.courses.addCourse);
-  const addDepartment = useMutation(api.department.addDepartment);
   const [openDialog1, setOpenDialog1] = useState(false);
-  const [openDialog2, setOpenDialog2] = useState(false);
+
   const handleClick = async () => {
     try {
       if (!id) {
@@ -58,7 +44,6 @@ export function Hero() {
         toast.error("Course duration must be greater than 0");
         return;
       }
-      // Check if course already exists in the current courses list
       const courseExists = courses.some(
         (course) =>
           course.name.toLowerCase() === courseName.trim().toLowerCase()
@@ -72,6 +57,12 @@ export function Hero() {
         name: courseName,
         duration: courseDuration,
       });
+      if (response === 404) {
+        toast.error("This Course Already Exists", {
+          position: "top-right",
+        });
+        return;
+      }
       if (response) {
         toast.success("Course added successfully", {
           position: "top-right",
@@ -83,66 +74,6 @@ export function Hero() {
     } catch (error: any) {
       console.error("Error adding course:", error);
       toast.error(error.message || "Failed to add course");
-    }
-  };
-
-  const handleAddDepartment = async () => {
-    try {
-      if (!courseName.trim()) {
-        toast.error("Department name is required", {
-          position: "top-right",
-        });
-        return;
-      }
-
-      if (courseDuration <= 0) {
-        toast.error("Duration must be greater than 0", {
-          position: "top-right",
-        });
-        return;
-      }
-
-      if (minimumClass <= 0) {
-        toast.error("Minimum classes must be greater than 0", {
-          position: "top-right",
-        });
-        return;
-      }
-
-      if (maximumClass <= 0) {
-        toast.error("Maximum classes must be greater than 0", {
-          position: "top-right",
-        });
-        return;
-      }
-
-      if (minimumClass > maximumClass) {
-        toast.error("Minimum classes cannot be greater than maximum classes", {
-          position: "top-right",
-        });
-        return;
-      }
-
-      const res = await addDepartment({
-        name: courseName,
-        years: courseDuration,
-        minimum_classes_per_day: minimumClass,
-        max_classes_per_day: maximumClass,
-      });
-
-      if (res) {
-        toast.success("Department added successfully", {
-          position: "top-right",
-        });
-        setCourseName("");
-        setCourseDuration(0);
-        setMinimumClass(0);
-        setMaximumClass(0);
-        setOpenDialog2(false);
-      }
-    } catch (error: any) {
-      console.error("Error adding department:", error);
-      toast.error(error.message || "Failed to add department");
     }
   };
 
@@ -169,7 +100,7 @@ export function Hero() {
       >
         <ResizablePanel defaultSize={70} minSize={65} maxSize={75}>
           <div className="flex items-center w-full h-full justify-center p-6 flex-col gap-2">
-            <div className="w-full h-full  grid grid-cols-5 gap-3">
+            <div className="grid grid-cols-5 gap-3">
               {/* //Show the courses here */}
               {courses?.length === 0 ? (
                 <p className="font-bold">No courses available yet</p>
@@ -177,6 +108,7 @@ export function Hero() {
                 courses.map((course: any, index: number) => (
                   <BlurFade key={course._id} delay={0.25 + index * 0.05} inView>
                     <CourseCard
+                      id={course._id}
                       key={index}
                       name={course.name}
                       duration={course.duration}
@@ -184,10 +116,6 @@ export function Hero() {
                   </BlurFade>
                 ))
               )}
-            </div>
-            <Separator className="bg-black dark:bg-white" />
-            <div className="w-full h-full">
-              {/* //Show  the departments here */}
             </div>
           </div>
         </ResizablePanel>
@@ -217,87 +145,11 @@ export function Hero() {
                         setCourseDuration(Number(e.target.value))
                       }
                     />
-
                     <Button
                       className="w-full cursor-pointer"
                       onClick={handleClick}
                     >
                       Add course
-                    </Button>
-                  </DialogDescription>
-                </DialogHeader>
-              </DialogContent>
-            </Dialog>
-            <Dialog open={openDialog2} onOpenChange={setOpenDialog2}>
-              <DialogTrigger asChild>
-                <Button className="w-auto px-7">Add department</Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle className="mb-5">
-                    Add all details below properly to add a department..
-                  </DialogTitle>
-                  <DialogDescription className="space-y-3">
-                    <Label className="dark:text-white text-black font-bold">
-                      Department Name
-                    </Label>
-                    <Input
-                      placeholder="Enter department name"
-                      value={courseName}
-                      onChange={(e) => setCourseName(e.target.value)}
-                    />
-                    <Label className="dark:text-white text-black font-bold">
-                      Duration (in years)
-                    </Label>
-                    <Input
-                      type="number"
-                      placeholder="Enter duration in years"
-                      value={courseDuration}
-                      onChange={(e) =>
-                        setCourseDuration(Number(e.target.value))
-                      }
-                    />
-                    <Label className="dark:text-white text-black font-bold">
-                      Minimum Classes Per Day
-                    </Label>
-                    <Input
-                      type="number"
-                      placeholder="Enter minimum classes per day"
-                      value={minimumClass}
-                      onChange={(e) => setMinimumClass(Number(e.target.value))}
-                    />
-                    <Label className="dark:text-white text-black font-bold">
-                      Maximum Classes Per Day
-                    </Label>
-                    <Input
-                      type="number"
-                      placeholder="Enter maximum classes per day"
-                      value={maximumClass}
-                      onChange={(e) => setMaximumClass(Number(e.target.value))}
-                    />
-                    {/* Add a select course filed her  */}
-                    <Label>Select the preferred course</Label>
-                    <Select>
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Select a fruit" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectGroup>
-                          <SelectLabel>Fruits</SelectLabel>
-                          {courses.map((course: any, index: number) => (
-                            <SelectItem key={index} value={course.name}>
-                              {course.name}
-                            </SelectItem>
-                          ))}
-                        </SelectGroup>
-                      </SelectContent>
-                    </Select>
-
-                    <Button
-                      className="w-full cursor-pointer"
-                      onClick={handleAddDepartment}
-                    >
-                      Add Department
                     </Button>
                   </DialogDescription>
                 </DialogHeader>

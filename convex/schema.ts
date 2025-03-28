@@ -28,7 +28,6 @@ export default defineSchema({
 
   departments: defineTable({
     name: v.string(),
-    years: v.number(),
     course_id : v.optional(v.id('courses')),
     minimum_classes_per_day: v.number(),
     max_classes_per_day: v.number(),
