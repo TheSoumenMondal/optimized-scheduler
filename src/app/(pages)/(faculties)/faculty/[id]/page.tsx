@@ -12,6 +12,15 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableFooter,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import toast, { Toaster } from "react-hot-toast";
@@ -37,7 +46,7 @@ const CreateInvite = () => {
   const getInvitationForInstitute = useQuery(
     api.invitation.getInvitationForInstitute,
     {
-      institution_id: getCourseDetails?.institution_id,
+      institution_id: getCourseDetails?.institution_id as any,
     }
   );
 
@@ -48,10 +57,14 @@ const CreateInvite = () => {
   useEffect(() => {
     if (getInvitationForInstitute?.[0]?.token) {
       setInvitationLink(
-        `${process.env.NEXT_PUBLIC_APP_URL}/invitation/${getInvitationForInstitute[0].token}`
+        `${process.env.NEXT_PUBLIC_APP_URL}/invitation/${getInvitationForInstitute[0].token}?institution_id=${getCourseDetails?.institution_id}`
       );
     }
-  }, [getInvitationForInstitute]);
+  }, [getInvitationForInstitute, getCourseDetails?.institution_id]);
+
+  const getAllFaculties = useQuery(api.faculty.getAllFaculties, {
+    institutionId: getCourseDetails?.institution_id as any,
+  });
 
   if (!getCourseDetails) {
     return (
@@ -77,7 +90,7 @@ const CreateInvite = () => {
       });
       if (res) {
         setInvitationLink(
-          `${process.env.NEXT_PUBLIC_APP_URL}/invitation/${res.token}`
+          `${process.env.NEXT_PUBLIC_APP_URL}/invitation/${res.token}?institution_id=${getCourseDetails.institution_id}`
         );
         toast.success("Invitation created", {
           duration: 2000,
@@ -103,7 +116,7 @@ const CreateInvite = () => {
 
   return (
     <div className="w-full h-full">
-      <nav className="w-full justify-end flex items-center mt-6">
+      <nav className="w-full h-auto justify-end flex items-center mt-6">
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <Button variant="outline">Generate Invite Link</Button>
@@ -138,7 +151,32 @@ const CreateInvite = () => {
           </DialogContent>
         </Dialog>
       </nav>
-      <div></div>
+      <div className="w-full grid-cols-8 mt-4 flex">
+        <Table>
+          <TableHeader>
+            <TableRow className="hover:bg-transparent">
+              <TableHead>Name</TableHead>
+              <TableHead>Email</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Request Time</TableHead>
+              <TableHead className="text-right">Action</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {getAllFaculties?.map((item) => (
+              <TableRow key={item._id}>
+                <TableCell className="font-medium">{item.name}</TableCell>
+                <TableCell>{item.email}</TableCell>
+                <TableCell>{item.status}</TableCell>
+                <TableCell>{item._creationTime}</TableCell>
+                <TableCell className="text-right">
+                  <Button>Change Status</Button>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
       <Toaster />
     </div>
   );

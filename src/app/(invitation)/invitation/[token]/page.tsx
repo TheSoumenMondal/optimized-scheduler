@@ -1,163 +1,196 @@
-// "use client";
+"use client";
 
-// import React, { useState } from "react";
-// import { useMutation } from "convex/react";
-// import { useSearchParams } from "next/navigation";
-// import { Input } from "@/components/ui/input";
-// import { Label } from "@/components/ui/label";
-// import { Button } from "@/components/ui/button";
-// import { Loader2 } from "lucide-react";
-// import { api } from "../../../../../convex/_generated/api";
-
-// const FacultyForm = () => {
-//   const [formData, setFormData] = useState({
-//     name: "",
-//     email: "",
-//     department: "",
-//   });
-//   const [message, setMessage] = useState("");
-//   const [isSubmitting, setIsSubmitting] = useState(false);
-//   const searchParams = useSearchParams();
-//   const token = searchParams.get("token");
-
-//   const createFaculty = useMutation(api.faculty.createFaculty);
-
-//   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-//     const { name, value } = e.target;
-//     setFormData((prev) => ({ ...prev, [name]: value }));
-//   };
-
-//   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-//     e.preventDefault();
-//     setMessage("");
-//     setIsSubmitting(true);
-
-//     try {
-//       if (!token) {
-//         setMessage("Error: No invitation token provided in the URL.");
-//         return;
-//       }
-
-//       const result = await createFaculty({
-//         token,
-//         name: formData.name,
-//         email: formData.email,
-//         department: formData.department,
-//       });
-
-//       if (result === 404) {
-//         setMessage("Error: Invalid or expired invitation token.");
-//       } else if (result === 400) {
-//         setMessage("Error: Faculty with this email already exists.");
-//       } else {
-//         setMessage("Faculty registration successful! Awaiting admin approval.");
-//         setFormData({
-//           name: "",
-//           email: "",
-//           department: "",
-//         });
-//       }
-//     } catch (error) {
-//       setMessage("Error: Something went wrong. Please try again.");
-//     } finally {
-//       setIsSubmitting(false);
-//     }
-//   };
-
-//   return (
-//     <div className="w-full h-screen flex items-center justify-center">
-//       <div className="md:w-96 mx-auto my-12 p-6 rounded-lg">
-//         <h2 className="text-2xl font-bold text-center mb-6">
-//           Faculty Registration
-//         </h2>
-//         {token ? (
-//           <p className="text-gray-600 text-sm text-center">Using Valid token :)</p>
-//         ) : (
-//           <p className="text-red-600 text-sm text-center">
-//             No invitation token found. Please use a valid link.
-//           </p>
-//         )}
-//         <form onSubmit={handleSubmit} className="space-y-4">
-//           <div>
-//             <Label htmlFor="name" className="block font-semibold mb-1">
-//               Name:
-//             </Label>
-//             <Input
-//               type="text"
-//               id="name"
-//               name="name"
-//               value={formData.name}
-//               onChange={handleChange}
-//               required
-//               className="w-full"
-//             />
-//           </div>
-//           <div>
-//             <Label htmlFor="email" className="block font-semibold mb-1">
-//               Email:
-//             </Label>
-//             <Input
-//               type="email"
-//               id="email"
-//               name="email"
-//               value={formData.email}
-//               onChange={handleChange}
-//               required
-//               className="w-full"
-//             />
-//           </div>
-//           <div>
-//             <Label htmlFor="department" className="block font-semibold mb-1">
-//               Department:
-//             </Label>
-//             <Input
-//               type="text"
-//               id="department"
-//               name="department"
-//               value={formData.department}
-//               onChange={handleChange}
-//               required
-//               className="w-full"
-//             />
-//           </div>
-//           <Button
-//             type="submit"
-//             disabled={!token || isSubmitting}
-//             className="w-full cursor-pointer"
-//           >
-//             {isSubmitting ? (
-//                 <>
-//                 <p className="select-none">Submitting...</p>
-//                 <span><Loader2 className="animate-spin"/></span>
-//                 </>
-//             ) : "Submit Request"}
-//           </Button>
-//         </form>
-//         {message && (
-//           <p
-//             className={`mt-4 text-center text-[12px] ${
-//               message.startsWith("Error") ? "text-red-600" : "text-green-600"
-//             }`}
-//           >
-//             {message}
-//           </p>
-//         )}
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default FacultyForm;
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { useMutation, useQuery } from "convex/react";
+import React, { useEffect, useState } from "react";
+import { api } from "../../../../../convex/_generated/api";
+import { useParams, useSearchParams } from "next/navigation";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { CheckboxGroup } from "@heroui/checkbox";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
+import { Loader2 } from "lucide-react";
 
 
+const FacultyApplicationForm = () => {
+  // State hooks
+  const [name, setName] = useState<string>("");
+  const [email, setEmail] = useState<string>("");
+  const [course, setCourse] = useState<string>("");
+  const [department, setDepartment] = useState<string>("");
+  const [selectedSubjects, setSelectedSubjects] = useState<string[]>([]);
 
+  // Navigation hooks
+  const params = useSearchParams();
+  const token = useParams();
+  const institution_id = params.get("institution_id");
 
-import React from 'react'
+  // Query hooks
+  const validateToken = useQuery(api.invitation.validateToken, {
+    token: token?.token as any,
+  });
 
-const page = () => {
+  const getAllCourses = useQuery(api.courses.getAllCourses, {
+    institution_id: institution_id as any,
+  });
+
+  const getAllDepartments = useQuery(api.department.getAllDepartments, {
+    course_id: (course as any) || undefined,
+  });
+
+  const getAllSubjects = useQuery(api.subject.getAllSubjects, {
+    departmentId: (department as any) || undefined,
+  });
+
+  // Mutation hooks
+  const createFaculty = useMutation(api.faculty.createFaculty);
+
+  if (!validateToken) {
+    return (
+      <div className="w-full h-screen flex items-center justify-center flex-col text-red-500">
+        <Loader2 className="animate-spin" />
+        <p>
+          If it's taking longer than usual, please contact the administrator.
+          The link may no longer be valid.
+        </p>
+      </div>
+    );
+  }
+
+  const handleSubmit = async () => {
+    if (!name || !email || !institution_id || selectedSubjects.length === 0) {
+      alert(
+        "Please fill in all required fields and select at least one subject"
+      );
+      return;
+    }
+
+    try {
+      const res = await createFaculty({
+        name,
+        email,
+        institutionId: institution_id as any,
+        teaching_subjects: selectedSubjects as any,
+        isAvailable: false,
+        isVerified: false,
+        status: "pending",
+      });
+      console.log(res);
+      alert("Faculty application submitted successfully!");
+    } catch (error) {
+      console.error("Error submitting faculty application:", error);
+      alert("Failed to submit faculty application");
+    }
+  };
+
   return (
-    <div>page</div>
-  )
-}
+    <div className="w-full h-screen flex items-center justify-center">
+      <div className="w-96 h-auto px-6 space-y-4">
+        <div className="flex flex-col gap-2">
+          <Label className="text-xl font-bold">Hey! </Label>
+          <Label className="text-xl font-bold">Let's Join The Institute</Label>
+          <Separator />
+        </div>
+        <Input
+          placeholder="Henry Kevil"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
+        <Input
+          placeholder="username@emailprovider.com"
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
 
-export default page
+        <Select onValueChange={(value) => setCourse(value)}>
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="Select Course" />
+          </SelectTrigger>
+          <SelectContent>
+            {getAllCourses?.map((course) => (
+              <SelectItem key={course._id} value={course._id}>
+                {course.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        {course && (
+          <Select onValueChange={(value) => setDepartment(value)}>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Select Department" />
+            </SelectTrigger>
+            <SelectContent>
+              {getAllDepartments?.map((dept) => (
+                <SelectItem key={dept._id} value={dept._id}>
+                  {dept.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
+
+        {course &&
+          department &&
+          (getAllSubjects ? (
+            getAllSubjects.length === 0 ? (
+              <div className="w-full flex items-center justify-center text-red-500 text-[12px]">
+                No Subjects are Added yet.
+                Please contact the administrator
+              </div>
+            ) : (
+              <CheckboxGroup
+                className="w-full"
+                value={selectedSubjects}
+                onValueChange={setSelectedSubjects}
+                label="Select Subjects"
+              >
+                {getAllSubjects?.map((sub) => (
+                  <div key={sub._id} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={sub._id}
+                      checked={selectedSubjects.includes(sub._id)}
+                      onCheckedChange={(checked) => {
+                        if (checked) {
+                          setSelectedSubjects([...selectedSubjects, sub._id]);
+                        } else {
+                          setSelectedSubjects(
+                            selectedSubjects.filter((id) => id !== sub._id)
+                          );
+                        }
+                      }}
+                    />
+                    <Label
+                      htmlFor={sub._id}
+                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                    >
+                      {sub.name}
+                    </Label>
+                  </div>
+                ))}
+              </CheckboxGroup>
+            )
+          ) : (
+            <div className="w-full flex items-center justify-center">
+              <Loader2 className="animate-spin" />
+            </div>
+          ))}
+
+        <Button onClick={handleSubmit} className="w-full">
+          Submit Application
+        </Button>
+      </div>
+    </div>
+  );
+};
+
+export default FacultyApplicationForm;

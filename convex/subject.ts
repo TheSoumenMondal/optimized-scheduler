@@ -52,3 +52,20 @@ export const getSubjects = query({
         return subjects;
     }
 })
+
+
+export const getAllSubjects = query({
+    args: {
+        departmentId: v.optional(v.id("departments"))  // 
+    },
+    handler: async (ctx, args) => {
+
+        const query = ctx.db.query("subjects");
+        if (args.departmentId) {
+            return await query
+                .filter(q => q.eq(q.field("departmentId"), args.departmentId))
+                .collect();
+        }
+        return await query.collect();
+    }
+})

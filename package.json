@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@heroui/card": "^2.2.15",
+    "@heroui/checkbox": "^2.3.16-beta.2",
     "@heroui/modal": "^2.2.14-beta.2",
     "@heroui/react": "^2.7.6-beta.2",
     "@heroui/snippet": "^2.2.18-beta.2",

@@ -50,15 +50,52 @@ export const getInvitationForInstitute = query({
 });
 
 
-
-export const getToken = query({
+export const getInstitutionByToken = query({
     args: {
-        institution_id: v.id("institutions")
+        token: v.string(),
     },
     handler: async (ctx, args) => {
-        const token = ctx.db
-            .query("invitation")
-            .filter((q) => q.eq(q.field("institutionId"), args.institution_id)).unique()
-        return token
+        try {
+            const invitation = await ctx.db
+                .query("invitation")
+                .filter((q) => q.eq(q.field("token"), args.token)).unique()
+
+            if (!invitation) {
+                return null;
+            }
+
+            return invitation
+        } catch (error) {
+            console.error("Error in getInstitutionByToken:", error);
+            return null;
+        }
+    }
+});
+
+
+export const validateToken = query({
+    args: {
+        token: v.string(),
     },
-})
+    handler: async (ctx, args) => {
+        try {
+            const invitation = await ctx.db
+                .query("invitation")
+                .filter((q) => q.eq(q.field("token"), args.token))
+                .unique();
+            if (!invitation) {
+                return 404;
+            }
+            if (invitation.expiry < Date.now()) {
+                return 410;
+            }
+            if (invitation.status !== "active") {
+                return 403;
+            }
+            return 202;
+        } catch (error) {
+            console.error("Error validating token:", error);
+            return 500;
+        }
+    }
+});

@@ -28,7 +28,7 @@ const Departments = () => {
   }
 
   const handleClickNext = () => {
-    router.push(`/faculty/${getDepartmentDetails._id}`);
+    router.push(`/faculty/${getDepartmentDetails._id}/`);
   };
 
   return (
