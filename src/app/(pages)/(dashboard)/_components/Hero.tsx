@@ -21,6 +21,7 @@ import toast, { Toaster } from "react-hot-toast";
 import { useParams } from "next/navigation";
 import { CourseCard } from "./CourseCard";
 import { BlurFade } from "@/components/magicui/blur-fade";
+import { Label } from "@/components/ui/label";
 
 export function Hero() {
   const { id } = useParams();
@@ -137,6 +138,7 @@ export function Hero() {
                       value={courseName}
                       onChange={(e) => setCourseName(e.target.value)}
                     />
+                    <Label>Enter the duration of the course</Label>
                     <Input
                       placeholder="Enter duration of course"
                       type="number"

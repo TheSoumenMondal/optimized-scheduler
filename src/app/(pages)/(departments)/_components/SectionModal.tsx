@@ -32,9 +32,7 @@ export default function SectionModel() {
   const [hasGroups, setHasGroups] = useState<boolean>(false);
   const [year_id, setYear_id] = useState<string>("");
   const [years, setYears] = useState<Array<any>>([]);
-
   const [groups, setGroups] = useState<Array<string>>([]);
-
   const [groupNum, setGroupNum] = useState<number>(0);
 
   const getDepartmentDetails = useQuery(api.department.getDepartmentDetails, {
@@ -46,6 +44,38 @@ export default function SectionModel() {
   });
 
   const createSection = useMutation(api.section.createSection);
+  const generateYears = useMutation(api.years.generateYears);
+  const getYears = useQuery(api.years.getAllYears, {
+    department_id: id as any,
+  });
+
+  useEffect(() => {
+    if (!getCourseDetails) return;
+
+    const createYears = async () => {
+      if (getCourseDetails.duration > 0) {
+        for (let i = 0; i < getCourseDetails.duration; i++) {
+          await generateYears({
+            department_id: id as any,
+            name: i + 1,
+          });
+        }
+      }
+    };
+
+    createYears();
+  }, [getCourseDetails, generateYears, id]);
+
+  useEffect(() => {
+    if (getYears) {
+      setYears(getYears);
+    }
+  }, [getYears]);
+
+  useEffect(() => {
+    setGroupNum(0);
+    setGroups([]);
+  }, [hasGroups]);
 
   const handleCreateSection = async () => {
     const res = await createSection({
@@ -66,41 +96,6 @@ export default function SectionModel() {
     });
   };
 
-  const generateYears = useMutation(api.years.generateYears);
-
-  if (!getCourseDetails) {
-    toast.error("Course not found", {
-      duration: 3000,
-      position: "top-right",
-    });
-    return null;
-  }
-
-  const getYears = useQuery(api.years.getAllYears, {
-    department_id: id as any,
-  });
-
-  useEffect(() => {
-    const createYears = async () => {
-      if (getCourseDetails && getCourseDetails.duration) {
-        for (let i = 0; i < getCourseDetails.duration; i++) {
-          const res = await generateYears({
-            department_id: id as any,
-            name: i + 1,
-          });
-        }
-      }
-    };
-
-    createYears();
-  }, [getCourseDetails, generateYears]);
-
-  useEffect(() => {
-    if (getYears) {
-      setYears(getYears);
-    }
-  }, [getYears]);
-
   const handleHasGroupsChange = (value: string) => {
     setHasGroups(value === "true");
   };
@@ -109,10 +104,9 @@ export default function SectionModel() {
     setYear_id(value);
   };
 
-  useEffect(() => {
-    setGroupNum(0);
-    setGroups([]);
-  }, [hasGroups]);
+  if (!getCourseDetails) {
+    return null;
+  }
 
   return (
     <>
