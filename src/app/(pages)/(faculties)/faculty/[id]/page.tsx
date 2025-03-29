@@ -15,14 +15,17 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import toast, { Toaster } from "react-hot-toast";
+import { Loader2 } from "lucide-react";
 
 const CreateInvite = () => {
   const { id } = useParams();
 
+  // State hooks
   const [invitationLink, setInvitationLink] = useState<string>("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isGenerated, setIsGenerated] = useState<boolean>(false);
 
+  // Query hooks
   const getDepartmentDetails = useQuery(api.department.getDepartmentDetails, {
     department_id: id as string,
   });
@@ -31,16 +34,6 @@ const CreateInvite = () => {
     course_id: getDepartmentDetails?.course_id as any,
   });
 
-  const createInvitation = useMutation(api.invitation.createInvitation);
-
-  if (!getCourseDetails) {
-    return (
-      <div className="p-4">
-        <p className="text-red-500">Course not found</p>
-      </div>
-    );
-  }
-
   const getInvitationForInstitute = useQuery(
     api.invitation.getInvitationForInstitute,
     {
@@ -48,6 +41,10 @@ const CreateInvite = () => {
     }
   );
 
+  // Mutation hooks
+  const createInvitation = useMutation(api.invitation.createInvitation);
+
+  // Effect hooks
   useEffect(() => {
     if (getInvitationForInstitute?.[0]?.token) {
       setInvitationLink(
@@ -55,6 +52,14 @@ const CreateInvite = () => {
       );
     }
   }, [getInvitationForInstitute]);
+
+  if (!getCourseDetails) {
+    return (
+      <div className="h-full w-full flex items-center justify-center">
+        <Loader2 className="w-10 h-10 animate-spin" />
+      </div>
+    );
+  }
 
   const createInvite = async () => {
     setIsGenerated(true);
