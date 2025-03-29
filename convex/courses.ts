@@ -66,11 +66,16 @@ export const getAllCourses = query({
 
 export const getCourseDetails = query({
     args: {
-        course_id: v.id('courses')
+        course_id: v.optional(v.id('courses'))
     },
     handler: async (ctx, args) => {
-        const course = await ctx.db.get(args.course_id);
-        if (!course) return 404;
-        return course;
+        try {
+            if (!args.course_id) return null;
+            const course = await ctx.db.get(args.course_id);
+            if (!course) return null;
+            return course;
+        } catch (error: any) {
+            throw new Error(`Failed to fetch course details: ${error.message}`);
+        }
     }
 })

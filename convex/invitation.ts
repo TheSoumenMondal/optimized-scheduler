@@ -35,7 +35,7 @@ export const createInvitation = mutation({
 
 export const getInvitationForInstitute = query({
     args: {
-        institution_id: v.id("institutions"),
+        institution_id: v.optional(v.id("institutions")),
     },
     handler: async (ctx, args) => {
         const invitation = await ctx.db

@@ -4,9 +4,8 @@ import { api } from "../../../../../convex/_generated/api";
 import { useParams } from "next/navigation";
 import { Separator } from "@/components/ui/separator";
 
-const GetSections = () => {
+const GetAllSubjects = () => {
   const { id } = useParams();
-
 
   const getYear = useQuery(api.years.getAllYears, {
     department_id: id as any,
@@ -21,7 +20,7 @@ const GetSections = () => {
               {year.name} Year
             </h4>
             <div className="flex-1 p-4 rounded-lg shadow-sm">
-              <SectionsForYear yearId={year._id} />
+              <SubjectsForYear yearId={year._id} />
             </div>
           </div>
         ))}
@@ -30,27 +29,27 @@ const GetSections = () => {
   );
 };
 
-const SectionsForYear = ({ yearId }: { yearId: string }) => {
-  const sections = useQuery(api.section.getSection, {
-    year_id: yearId as any,
+const SubjectsForYear = ({ yearId }: { yearId: string }) => {
+  const subjects = useQuery(api.subject.getSubjects, {
+    yearId: yearId as any,
   });
 
-  if (!sections || sections.length === 0) {
-    return <p className="text-sm italic">No sections available</p>;
+  if (!subjects || subjects.length === 0) {
+    return <p className="text-sm italic">No subjects available</p>;
   }
 
   return (
     <div className="flex justify-start items-center gap-4">
-      {sections.map((section) => (
+      {subjects.map((subject) => (
         <div
-          key={section._id}
+          key={subject._id}
           className="p-3 border rounded-md text-sm font-medium"
         >
-          {section.name}
+          {subject.name}
         </div>
       ))}
     </div>
   );
 };
 
-export default GetSections;
+export default GetAllSubjects;

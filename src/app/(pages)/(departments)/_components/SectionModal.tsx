@@ -68,7 +68,7 @@ export default function SectionModel() {
 
   const generateYears = useMutation(api.years.generateYears);
 
-  if (getCourseDetails === 404) {
+  if (!getCourseDetails) {
     toast.error("Course not found", {
       duration: 3000,
       position: "top-right",
@@ -139,7 +139,9 @@ export default function SectionModel() {
                 />
               </div>
               <div className="space-y-2">
-                <Label className="text-sm" htmlFor="hasGroups">Has Any Groups?</Label>
+                <Label className="text-sm" htmlFor="hasGroups">
+                  Has Any Groups?
+                </Label>
                 <Select
                   defaultValue={hasGroups ? "true" : "false"}
                   onValueChange={handleHasGroupsChange}
@@ -182,7 +184,9 @@ export default function SectionModel() {
                       value={groupNum}
                       onChange={(e) => setGroupNum(Number(e.target.value))}
                     />
-                    <Label className="text-sm">Enter group names separated by comma</Label>
+                    <Label className="text-sm">
+                      Enter group names separated by comma
+                    </Label>
                     <Input
                       placeholder="Enter group names separated by comma"
                       type="text"
