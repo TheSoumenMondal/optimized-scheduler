@@ -19,6 +19,8 @@ import type * as department from "../department.js";
 import type * as faculty from "../faculty.js";
 import type * as institution from "../institution.js";
 import type * as invitation from "../invitation.js";
+import type * as section from "../section.js";
+import type * as years from "../years.js";
 
 /**
  * A utility for referencing Convex functions in your app's API.
@@ -35,6 +37,8 @@ declare const fullApi: ApiFromModules<{
   faculty: typeof faculty;
   institution: typeof institution;
   invitation: typeof invitation;
+  section: typeof section;
+  years: typeof years;
 }>;
 export declare const api: FilterApi<
   typeof fullApi,

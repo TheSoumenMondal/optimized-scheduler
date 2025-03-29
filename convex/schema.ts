@@ -28,13 +28,16 @@ export default defineSchema({
 
   departments: defineTable({
     name: v.string(),
+    number_of_sections : v.number(),
+    years : v.optional(v.array(v.id('years'))),
     course_id : v.optional(v.id('courses')),
     minimum_classes_per_day: v.number(),
     max_classes_per_day: v.number(),
   }),
 
   years: defineTable({
-    name: v.string(),
+    name: v.number(),
+    department_id : v.optional(v.id('departments')),
     sections: v.optional(v.array(v.id('sections'))),
     subjects: v.optional(v.array(v.id('subjects'))),
   }),
@@ -43,6 +46,8 @@ export default defineSchema({
     name: v.string(),
     subject_code: v.string(),
     isPractical: v.boolean(),
+    departmentId : v.optional(v.id('departments')),
+    yearId : v.optional(v.id('years')),
     sub_class_duration: v.optional(v.number()),
     per_week_timing: v.optional(v.number()),
     subject_teachers: v.optional(v.array(v.id('faculties'))),
@@ -62,13 +67,11 @@ export default defineSchema({
   sections: defineTable({
     name: v.string(),
     hasGroups: v.boolean(),
-    groups: v.optional(v.array(v.id('groups'))),
+    department_id : v.optional(v.id('departments')),
+    year_id : v.optional(v.id('years')),
+    groups: v.optional(v.array(v.string())),
   }),
 
-  groups: defineTable({
-    name: v.string(),
-    student_capacity: v.optional(v.number()),
-  }),
 
   labs: defineTable({
     name: v.string(),

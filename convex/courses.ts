@@ -57,3 +57,15 @@ export const getAllCourses = query({
         }
     }
 });
+
+
+export const getCourseDetails = query({
+    args: {
+        course_id: v.id('courses')
+    },
+    handler: async (ctx, args) => {
+        const course = await ctx.db.get(args.course_id);
+        if(!course) return 404;
+        return course;
+    }
+})

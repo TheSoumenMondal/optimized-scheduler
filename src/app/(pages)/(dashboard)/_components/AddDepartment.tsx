@@ -1,4 +1,4 @@
-'use client'
+"use client";
 
 import { Input } from "@/components/ui/input";
 import React, { useState } from "react";
@@ -18,6 +18,7 @@ const AddDepartment = ({ id }: AddDepartmentProps) => {
   const [departmentName, setDepartmentName] = useState("");
   const [minClasses, setMinClasses] = useState<number>(0);
   const [maxClasses, setMaxClasses] = useState<number>(0);
+  const [sectionNum, setSectionNum] = useState<number>(0);
 
   const addDepartment = useMutation(api.department.addDepartment);
 
@@ -32,9 +33,19 @@ const AddDepartment = ({ id }: AddDepartmentProps) => {
       const response = await addDepartment({
         course_id: id as any,
         name: departmentName,
+        number_of_sections: sectionNum,
         minimum_classes_per_day: minClasses,
         max_classes_per_day: maxClasses,
       });
+
+
+      setDepartmentName("");
+      setMinClasses(0);
+      setMaxClasses(0);
+      setSectionNum(0);
+
+
+
       if (response === 404) {
         toast.error("Department already exists", {
           position: "top-right",
@@ -63,6 +74,12 @@ const AddDepartment = ({ id }: AddDepartmentProps) => {
           type="text"
           value={departmentName}
           onChange={(e) => setDepartmentName(e.target.value)}
+        />
+        <Label>Enter the number of section</Label>
+        <Input
+          type="number"
+          value={sectionNum}
+          onChange={(e) => setSectionNum(Number(e.target.value))}
         />
         <Label>Enter the minimum number of classes per day</Label>
         <Input
