@@ -7,7 +7,6 @@ export const generateYears = mutation({
         department_id: v.optional(v.id('departments')),
     },
     handler: async (ctx, args) => {
-        // Query existing years and collect the results
         const existingYears = await ctx.db
             .query("years")
             .filter((q) =>
@@ -18,7 +17,6 @@ export const generateYears = mutation({
             )
             .collect();
 
-        // Check if there are any existing years
         if (existingYears.length > 0) return "404";
 
         // If no existing year found, create a new one

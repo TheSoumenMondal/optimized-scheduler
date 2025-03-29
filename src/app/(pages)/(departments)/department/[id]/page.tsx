@@ -9,6 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import SectionModel from "../../_components/SectionModal";
 import GetSections from "../../_components/GetSections";
+import AddSubject from "../../_components/AddSubject";
 
 const Departments = () => {
   const { id } = useParams();
@@ -42,7 +43,7 @@ const Departments = () => {
         </div>
         <div className="w-full h-full bg-yellow-400 rounded-xl">
           <div className="w-full flex justify-end">
-            <Button>Add Subject Details</Button>
+            <AddSubject/>
           </div>
 
           {/* Show Subjects */}

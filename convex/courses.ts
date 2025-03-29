@@ -33,6 +33,11 @@ export const addCourse = mutation({
                 departments: [...(args.departments ?? [])]
             });
 
+            const institution = await ctx.db.get(args.institution_id);
+            await ctx.db.patch(args.institution_id, {
+                courses_offered: [...(institution?.courses_offered ?? []), course]
+            });
+
             return course;
         } catch (error: any) {
             throw new Error(`Failed to add course: ${error.message}`);
@@ -65,7 +70,7 @@ export const getCourseDetails = query({
     },
     handler: async (ctx, args) => {
         const course = await ctx.db.get(args.course_id);
-        if(!course) return 404;
+        if (!course) return 404;
         return course;
     }
 })

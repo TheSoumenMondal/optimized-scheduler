@@ -48,7 +48,7 @@ export default defineSchema({
     isPractical: v.boolean(),
     departmentId : v.optional(v.id('departments')),
     yearId : v.optional(v.id('years')),
-    sub_class_duration: v.optional(v.number()),
+    Class_duration: v.optional(v.number()),
     per_week_timing: v.optional(v.number()),
     subject_teachers: v.optional(v.array(v.id('faculties'))),
   }),

@@ -20,6 +20,7 @@ import type * as faculty from "../faculty.js";
 import type * as institution from "../institution.js";
 import type * as invitation from "../invitation.js";
 import type * as section from "../section.js";
+import type * as subject from "../subject.js";
 import type * as years from "../years.js";
 
 /**
@@ -38,6 +39,7 @@ declare const fullApi: ApiFromModules<{
   institution: typeof institution;
   invitation: typeof invitation;
   section: typeof section;
+  subject: typeof subject;
   years: typeof years;
 }>;
 export declare const api: FilterApi<

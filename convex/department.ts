@@ -27,6 +27,12 @@ export const addDepartment = mutation({
             minimum_classes_per_day: args.minimum_classes_per_day,
             max_classes_per_day: args.max_classes_per_day
         })
+
+        const course = await ctx.db.get(args.course_id!);
+        await ctx.db.patch(args.course_id!, {
+            departments: [...(course?.departments || []), newDepartment]
+        });
+
         return newDepartment
     }
 })
