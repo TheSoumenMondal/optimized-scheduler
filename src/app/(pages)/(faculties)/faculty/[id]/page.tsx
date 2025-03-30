@@ -7,7 +7,7 @@ import { useParams } from "next/navigation";
 import {
   Dialog,
   DialogContent,
-  DialogFooter,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -25,6 +25,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import toast, { Toaster } from "react-hot-toast";
 import { Loader2 } from "lucide-react";
+import StatusChangerButton from "../../_components/StatusChangerButton";
 
 const CreateInvite = () => {
   const { id } = useParams();
@@ -170,7 +171,7 @@ const CreateInvite = () => {
                 <TableCell>{item.status}</TableCell>
                 <TableCell>{item._creationTime}</TableCell>
                 <TableCell className="text-right">
-                  <Button>Change Status</Button>
+                  <StatusChangerButton id ={item._id}/>
                 </TableCell>
               </TableRow>
             ))}

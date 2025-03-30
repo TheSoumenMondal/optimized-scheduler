@@ -18,24 +18,22 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Loader2 } from "lucide-react";
-
+import toast, { Toaster } from "react-hot-toast";
 
 const FacultyApplicationForm = () => {
-  // State hooks
   const [name, setName] = useState<string>("");
   const [email, setEmail] = useState<string>("");
   const [course, setCourse] = useState<string>("");
   const [department, setDepartment] = useState<string>("");
   const [selectedSubjects, setSelectedSubjects] = useState<string[]>([]);
+  const [isValidToken, setIsValidToken] = useState<boolean>(true);
 
-  // Navigation hooks
   const params = useSearchParams();
-  const token = useParams();
+  const { token } = useParams();
   const institution_id = params.get("institution_id");
 
-  // Query hooks
   const validateToken = useQuery(api.invitation.validateToken, {
-    token: token?.token as any,
+    token: token as string,
   });
 
   const getAllCourses = useQuery(api.courses.getAllCourses, {
@@ -50,10 +48,22 @@ const FacultyApplicationForm = () => {
     departmentId: (department as any) || undefined,
   });
 
-  // Mutation hooks
   const createFaculty = useMutation(api.faculty.createFaculty);
 
-  if (!validateToken) {
+  useEffect(() => {
+    if (validateToken === null) {
+      setIsValidToken(false);
+    }
+  }, [validateToken]);
+
+  if (
+    validateToken === null ||
+    validateToken === 404 ||
+    validateToken === 410 ||
+    validateToken === 403 ||
+    validateToken === 500 ||
+    validateToken === undefined
+  ) {
     return (
       <div className="w-full h-screen flex items-center justify-center flex-col text-red-500">
         <Loader2 className="animate-spin" />
@@ -67,8 +77,11 @@ const FacultyApplicationForm = () => {
 
   const handleSubmit = async () => {
     if (!name || !email || !institution_id || selectedSubjects.length === 0) {
-      alert(
-        "Please fill in all required fields and select at least one subject"
+      toast.error(
+        "Please fill in all required fields and select at least one subject",
+        {
+          position: "top-right",
+        }
       );
       return;
     }
@@ -83,11 +96,21 @@ const FacultyApplicationForm = () => {
         isVerified: false,
         status: "pending",
       });
-      console.log(res);
-      alert("Faculty application submitted successfully!");
+
+      if (res === 404) {
+        toast.error("You have already submitted an application", {
+          position: "top-right",
+        });
+        return;
+      }
+
+      toast.success("Faculty application submitted successfully!", {
+        position: "top-right",
+      });
     } catch (error) {
-      console.error("Error submitting faculty application:", error);
-      alert("Failed to submit faculty application");
+      toast.error("Failed to submit faculty application", {
+        position: "top-right",
+      });
     }
   };
 
@@ -111,7 +134,7 @@ const FacultyApplicationForm = () => {
           onChange={(e) => setEmail(e.target.value)}
         />
 
-        <Select onValueChange={(value) => setCourse(value)}>
+        <Select onValueChange={setCourse}>
           <SelectTrigger className="w-full">
             <SelectValue placeholder="Select Course" />
           </SelectTrigger>
@@ -125,7 +148,7 @@ const FacultyApplicationForm = () => {
         </Select>
 
         {course && (
-          <Select onValueChange={(value) => setDepartment(value)}>
+          <Select onValueChange={setDepartment}>
             <SelectTrigger className="w-full">
               <SelectValue placeholder="Select Department" />
             </SelectTrigger>
@@ -144,8 +167,7 @@ const FacultyApplicationForm = () => {
           (getAllSubjects ? (
             getAllSubjects.length === 0 ? (
               <div className="w-full flex items-center justify-center text-red-500 text-[12px]">
-                No Subjects are Added yet.
-                Please contact the administrator
+                No Subjects are Added yet. Please contact the administrator
               </div>
             ) : (
               <CheckboxGroup
@@ -189,6 +211,7 @@ const FacultyApplicationForm = () => {
           Submit Application
         </Button>
       </div>
+      <Toaster />
     </div>
   );
 };
