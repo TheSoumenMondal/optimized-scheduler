@@ -34,7 +34,6 @@ export const getAllFaculties = query({
                 .collect();
         }
 
-        // Return all faculties if no institution filter
         return await query.collect();
     }
 })
@@ -46,7 +45,7 @@ export const verifyFaculty = mutation({
         status: v.union(v.literal('pending'), v.literal('approved'), v.literal('rejected'))
     },
     handler: async (ctx, args) => {
-        const faculty = ctx.db.get(args.faculty_id!)
+        const faculty = await ctx.db.get(args.faculty_id!)
         if (!faculty) return 404;
         if (args.status === "pending") {
             await ctx.db.patch(args.faculty_id!, {
@@ -73,6 +72,39 @@ export const verifyFaculty = mutation({
             isVerified: true,
             status: "approved"
         })
+
+        if (faculty?.teaching_subjects) {
+            const subjects = await Promise.all(
+                faculty.teaching_subjects.map(async (subjectId) => {
+                    const subject = await ctx.db.get(subjectId);
+                    return subject;
+                })
+            );
+
+            for (const subject of subjects) {
+                if (subject) {
+                    const currentFaculties = subject.subject_teachers || [];
+                    if (!currentFaculties.includes(args.faculty_id!)) {
+                        await ctx.db.patch(subject._id, {
+                            subject_teachers: [...currentFaculties, args.faculty_id!]
+                        });
+                    }
+                }
+            }
+        }
+
+        if (faculty?.institutionId) {
+            const institution = await ctx.db.get(faculty.institutionId)
+            if (institution) {
+                const currentFaculties = institution.faculties || []
+                if (!currentFaculties.includes(args.faculty_id!)) {
+                    await ctx.db.patch(institution._id, {
+                        faculties: [...currentFaculties, args.faculty_id!]
+                    })
+                }
+            }
+        }
+
         return {
             message: "Faculty verified",
             status: 200
